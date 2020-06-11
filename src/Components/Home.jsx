@@ -37,7 +37,7 @@ class Home extends Component {
     .then(() => this.setState({loading: false}))
     .catch((err) => {
         this.setState({error: true})
-        console.log("An error has occurred: ", err)
+        console.log("An error has occurred: ", err)  
     })
 
     console.log(this.fetchComment("tt0133093"))
