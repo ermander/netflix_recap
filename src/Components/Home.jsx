@@ -1,8 +1,62 @@
-import React  from "react";
-import {Container, Row, Col, Dropdown} from "react-bootstrap"
+import React, { Component } from "react";
+import {Container, Row, Col, Dropdown, Alert} from "react-bootstrap"
 import Gallery from "./Gallery.jsx";
 
-const Home = () =>{
+class Home extends Component {
+    constructor(props) {
+      super(props);
+      this.state = {
+          transformers: [],
+          spiderman: [],
+          matrix: [],
+          loading: false,
+          error: false,
+      };
+    }
+
+    componentDidMount(){
+        Promise.all([
+        fetch("http://www.omdbapi.com/?i=tt3896198&apikey=e196135d" + "&s=transformers")
+        .then((response) => response.json())
+        .then((responseObject) => {
+        this.setState({transformers : responseObject.Search})
+        }),
+
+        fetch("http://www.omdbapi.com/?i=tt3896198&apikey=e196135d" + "&s=spiderman")
+        .then((response) => response.json())
+        .then((responseObject) => {
+        this.setState({spiderman : responseObject.Search})
+        }),
+
+        fetch("http://www.omdbapi.com/?i=tt3896198&apikey=e196135d" + "&s=matrix")
+        .then((response) => response.json())
+        .then((responseObject) => {
+        this.setState({matrix : responseObject.Search})
+        })
+    ])
+    .then(() => this.setState({loading: false}))
+    .catch((err) => {
+        this.setState({error: true})
+        console.log("An error has occurred: ", err)
+    })
+
+    console.log(this.fetchComment("tt0133093"))
+}
+
+    fetchComment = async (movieID) => {
+        const commentsUrl = "https://straiveschool.herokuapp.com/api/comments/"
+        const commets = await fetch(commentsUrl + movieID, {
+            headers: new Headers({
+                Authorization: "Basic dXNlcjg6ZUFxZDJaUGszUmJ0bThNdw==",
+            }),
+        })
+        const response = await commentsUrl.json()
+        console.log(response)
+    }
+
+    render() {
+
+
     return (
         <>            
             <Container fluid className="px-4">
@@ -34,31 +88,40 @@ const Home = () =>{
             </div>
             </Row>
 
+            {this.state.error &&  (
+                <Alert variant="danger">
+                An Error Has Accourred, pls try later
+                </Alert>
+            )}
+            
+
+
+            {!this.state.error &&
             <div>
                 <Gallery
-                    imageSrc="/assets/1.png"
-                    title="This is a title"
+                title="Transformers"
+                movies={this.state.transformers.slice(0, 6)}
+                loading={this.state.loading}
                 />
+            </div>}
+            <div>
                 <Gallery
-                    imageSrc="/assets/2.png"
-                    title="This is a title"
+                title="Spider Man"
+                movies={this.state.spiderman.slice(0, 6)}
+                loading={this.state.loading}
                 />
+            </div>}
+            <div>
                 <Gallery
-                    imageSrc="/assets/3.png"
-                    title="This is a title"
+                title="Matrix"
+                movies={this.state.matrix.slice(0, 6)}
+                loading={this.state.loading}
                 />
-                <Gallery
-                    imageSrc="/assets/4.png"
-                    title="This is a title"
-                />
-                <Gallery
-                    imageSrc="/assets/5.png"
-                    title="This is a title"
-                />
-            </div>
+            </div>}
             </Container>
         </>
     )
+}
 }
 
 export default Home
